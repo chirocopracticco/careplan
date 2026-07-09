@@ -1,0 +1,1297 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Clinic Financial Care Plan Generator</title>
+  <style>
+
+:root{
+  --bg:#f4f7fb;
+  --panel:#ffffff;
+  --line:#d8e1ea;
+  --text:#173042;
+  --muted:#5f7385;
+  --green:#0f7b6c;
+  --green-light:#e8f7f3;
+  --navy:#11324d;
+}
+*{box-sizing:border-box}
+body{
+  margin:0;
+  font-family:Arial,Helvetica,sans-serif;
+  color:var(--text);
+  background:var(--bg);
+}
+.app-shell{max-width:1480px;margin:0 auto;padding:24px}
+.hero{
+  display:flex;flex-direction:column;gap:16px;align-items:flex-start;
+  margin-bottom:20px;padding:24px;border-radius:18px;background:linear-gradient(135deg,#11324d,#1d5b76);color:#fff;
+}
+.eyebrow{margin:0 0 8px;font-size:12px;letter-spacing:.1em;text-transform:uppercase;opacity:.8}
+.hero h1{margin:0 0 8px;font-size:34px}
+.sub{margin:0;max-width:720px;line-height:1.5}
+.hero-actions{display:flex;flex-direction:column;gap:10px;width:100%;max-width:320px}
+.layout{display:block}
+.panel{
+  background:var(--panel);border:1px solid var(--line);border-radius:18px;padding:18px;
+  box-shadow:0 8px 20px rgba(17,50,77,.06)
+}
+.summary{}
+.inputs{position:static}
+h2,h3{margin:0 0 12px}
+.helper{margin:0 0 12px;color:var(--muted);font-size:14px}
+.grid{display:grid;gap:12px}
+.grid.two{grid-template-columns:1fr}
+.grid.three{grid-template-columns:1fr}
+.stack{display:grid;gap:10px}
+label span{display:block;font-size:13px;font-weight:700;margin-bottom:6px;color:var(--navy)}
+input,select,button{
+  width:100%;padding:10px 12px;border-radius:10px;border:1px solid #b8c6d4;background:#fff;font-size:14px
+}
+select{min-height:200px}
+button{
+  background:var(--green);color:#fff;border:none;font-weight:700;cursor:pointer
+}
+button.secondary{background:#edf3f8;color:var(--navy);border:1px solid var(--line)}
+.row-space{display:flex;justify-content:space-between;gap:10px;align-items:center}
+.noncovered-list{display:grid;gap:8px;margin:10px 0 16px}
+.noncovered-item{
+  display:grid;grid-template-columns:minmax(180px,1fr) auto auto;gap:10px;align-items:center;
+  padding:10px 12px;border:1px solid var(--line);border-radius:12px;background:#fafcfe
+}
+.qty-wrap{display:flex;align-items:center;gap:8px}.noncovered-qty{width:72px !important}
+.table-wrap{overflow:auto;border:1px solid var(--line);border-radius:14px}
+table{width:100%;border-collapse:collapse;font-size:14px;background:#fff}
+thead th{
+  position:sticky;top:0;background:#eff5f9;border-bottom:1px solid var(--line);padding:10px;text-align:left
+}
+tbody td{padding:10px;border-bottom:1px solid #edf1f5;vertical-align:top}
+tbody tr:nth-child(even){background:#fbfdff}
+.qty-input{width:90px}
+.money{text-align:right;font-variant-numeric:tabular-nums}
+.note{color:#8b5f00;font-size:12px;line-height:1.35}
+.cards{
+  display:grid;grid-template-columns:1fr;gap:14px;margin-bottom:18px
+}
+.cards.cards-four{grid-template-columns:1fr}
+.card{
+  border:1px solid var(--line);border-radius:16px;padding:16px;background:#fcfeff
+}
+.card.accent{background:var(--green-light);border-color:#b9e7dc}
+.card .label{display:block;color:var(--muted);font-size:13px;margin-bottom:8px}
+.card strong{font-size:30px}
+.summary-grid{display:grid;grid-template-columns:1fr;gap:20px}
+.layout > .panel{margin-bottom:18px}
+.detail-list{margin:0;padding-left:18px;line-height:1.6}
+.footer-note{margin-top:18px;padding:12px 14px;border-radius:12px;background:#f7fbfd;border:1px solid var(--line);color:var(--muted)}
+.muted{color:var(--muted)}
+.warning{color:#9a5a00;font-weight:700}
+@media (max-width:1100px){
+  .layout{grid-template-columns:1fr}
+  .inputs{position:static}
+  .summary-grid,.cards,.cards.cards-four,.grid.two,.grid.three{grid-template-columns:1fr}
+  .hero{flex-direction:column}
+}
+@media print{
+  body{background:#fff}
+  .app-shell{max-width:none;padding:0}
+  .hero{background:#fff;color:#000;border:1px solid #ddd}
+  button,#insuranceSearch,.helper{display:none !important}
+  .layout{display:block}
+  .panel{box-shadow:none;margin-bottom:14px}
+  select{border:none;padding:0;min-height:auto}
+}
+
+
+.printable-agreement{display:none}
+.agreement-header{margin-bottom:14px}
+.agreement-kicker{margin:0 0 6px;font-size:12px;letter-spacing:.08em;text-transform:uppercase;color:var(--muted)}
+.agreement-header h2{margin:0 0 6px;font-size:30px}
+.agreement-sub{margin:0;color:var(--muted)}
+.agreement-meta{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin:14px 0 18px;padding:12px;border:1px solid var(--line);border-radius:12px;background:#fbfdff}
+.agreement-section{margin-bottom:18px}
+.print-table{width:100%;border-collapse:collapse;font-size:14px}
+.print-table th,.print-table td{border:1px solid var(--line);padding:8px 10px;text-align:left}
+.print-table thead th{background:#eff5f9;position:static}
+.agreement-totals{display:grid;grid-template-columns:1.1fr .9fr;gap:18px}
+.totals-box{border:1px solid var(--line);border-radius:14px;padding:14px;background:#fcfeff}
+.totals-box div{display:flex;justify-content:space-between;gap:10px;padding:8px 0;border-bottom:1px solid #edf1f5}
+.totals-box div:last-child{border-bottom:none}
+.totals-box span{color:var(--muted)}
+.totals-box strong{font-size:22px}
+.agreement-disclaimer{margin:0;line-height:1.55}
+.signature-grid{display:grid;grid-template-columns:1fr 180px;gap:28px 22px;margin-top:30px}
+.signature-line{padding-top:28px;border-bottom:1px solid #666;position:relative;min-height:54px}
+.signature-line span{position:absolute;left:0;bottom:-22px;font-size:12px;color:#555}
+@media (max-width:1100px){.agreement-meta,.agreement-totals,.signature-grid{grid-template-columns:1fr}}
+@media print{
+  .hero-actions,.inputs,.plan-panel,.summary{display:none !important}
+  .printable-agreement{display:block !important;border:none;padding:0}
+  .app-shell{padding:0}
+  .hero{display:none !important}
+  .agreement-meta,.totals-box,.print-table th,.print-table td,.print-table,.printable-agreement{border-color:#bbb}
+  @page{margin:0.55in}
+}
+
+
+/* Version 4 layout and polished agreement improvements */
+.layout{grid-template-columns:minmax(340px,400px) minmax(0,1fr);align-items:start}
+.layout > *{min-width:0}
+.panel{overflow:hidden}
+.summary-header{display:flex;justify-content:space-between;gap:18px;align-items:flex-start;margin-bottom:12px}
+.helper.compact{margin:4px 0 0}
+.estimate-check{display:flex;align-items:center;justify-content:flex-end;min-width:240px}
+.checkbox{display:flex;gap:10px;align-items:flex-start;font-size:14px;font-weight:700;color:var(--navy);line-height:1.35}
+.checkbox input{width:18px;height:18px;margin-top:1px;accent-color:var(--green)}
+.grid.two{grid-template-columns:repeat(2,minmax(0,1fr))}
+.grid.three{grid-template-columns:repeat(3,minmax(0,1fr))}
+.grid.two > *, .grid.three > *{min-width:0}
+label{min-width:0}
+input,select,button{max-width:100%}
+#insuranceSelect{width:100%}
+.plan-panel .table-wrap{max-width:100%}
+.agreement-header.one-page{margin-bottom:10px}
+.agreement-brand{display:flex;align-items:center;gap:16px}
+.print-logo{width:220px;max-width:38%;height:auto;display:block}
+.agreement-sub{font-size:13px}
+.print-table{font-size:12px}
+.print-table th,.print-table td{padding:6px 8px}
+.agreement-meta{font-size:13px;padding:10px;margin:10px 0 12px}
+.agreement-section{margin-bottom:12px}
+.agreement-section h3{margin-bottom:8px;font-size:16px}
+.agreement-totals{gap:12px}
+.totals-box{padding:12px}
+.totals-box h3{font-size:16px;margin-bottom:6px}
+.totals-box div{padding:6px 0}
+.totals-box strong{font-size:20px}
+.agreement-bottom-row{display:block}
+.agreement-disclaimer-wrap{border:1px solid var(--line);border-radius:14px;padding:12px;background:#fcfeff}
+.print-checkbox{margin-top:10px}
+.signature-grid{margin-top:40px;gap:18px 18px}
+.signature-line{padding-top:20px;min-height:48px}
+.signature-line span{bottom:-20px}
+@media (max-width:1280px){
+  .layout{grid-template-columns:minmax(320px,380px) minmax(0,1fr)}
+}
+@media (max-width:1100px){
+  .layout{grid-template-columns:1fr}
+  .summary-header,.agreement-brand{grid-template-columns:1fr;display:grid}
+  .estimate-check{justify-content:flex-start;min-width:0}
+  .print-logo{max-width:220px;width:100%}
+}
+@media print{
+  body{font-size:11pt}
+  .printable-agreement{display:block !important;max-width:none;border:none;padding:0}
+  .agreement-brand{gap:12px}
+  .print-logo{width:180px;max-width:none}
+  .agreement-meta{grid-template-columns:repeat(3,1fr);font-size:11pt;padding:8px;margin:8px 0 10px}
+  .agreement-section{margin-bottom:10px}
+  .agreement-section h3{font-size:13pt;margin-bottom:6px}
+  .print-table{font-size:10.5pt}
+  .print-table th,.print-table td{padding:4px 6px}
+  .agreement-totals,.agreement-bottom-row{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+  .totals-box{padding:10px}
+  .totals-box strong{font-size:15pt}
+  .detail-list{margin:0;padding-left:16px;line-height:1.35}
+  .agreement-disclaimer{font-size:10pt;line-height:1.35}
+  .print-checkbox{font-size:10.5pt;margin-top:8px}
+  .signature-grid{grid-template-columns:1fr 120px;gap:16px 14px;margin-top:4px}
+  .signature-line{padding-top:18px;min-height:40px}
+  .signature-line span{font-size:10px;bottom:-18px}
+  @page{size:letter portrait;margin:0.45in}
+}
+
+
+/* Version 5 logo swap, print typography, and one-page agreement refinements */
+body{font-family:Arial,Helvetica,sans-serif}
+.hero h1,.agreement-header h2,.card strong,.totals-box strong{letter-spacing:-0.02em}
+.agreement-kicker{font-weight:700;letter-spacing:.12em}
+.agreement-brand{align-items:flex-end}
+.print-logo{width:250px;max-width:42%;object-fit:contain}
+.print-service-label{margin-top:2px;font-size:11px;line-height:1.25;color:#536475}
+.print-table td:first-child{font-size:11px;font-weight:700;letter-spacing:.02em}
+.print-table td:nth-child(2){width:30%}
+.print-table td:nth-child(3),.print-table th:nth-child(3){text-align:center;width:8%}
+.agreement-section,.totals-box,.agreement-disclaimer-wrap,.agreement-meta,.print-table,.signature-grid{break-inside:avoid;page-break-inside:avoid}
+.agreement-meta strong,.totals-box h3{color:var(--navy)}
+.agreement-disclaimer-wrap{background:linear-gradient(180deg,#ffffff,#f7fbfd)}
+.signature-grid{align-items:end}
+.signature-line{border-bottom:1.3px solid #4b4b4b}
+.signature-line span{font-weight:700}
+@media screen and (min-width:1200px){
+  .printable-agreement{max-width:1120px;margin:0 auto}
+}
+@media print{
+  body{font-family:Arial,Helvetica,sans-serif;color:#111;background:#fff}
+  .printable-agreement{display:block !important;width:100%;max-width:none;margin:0;padding:0}
+  .agreement-header.one-page{margin-bottom:6px}
+  .agreement-brand{gap:14px;align-items:flex-end}
+  .print-logo{width:2.2in;max-width:none}
+  .agreement-kicker{font-size:9pt;margin-bottom:2px}
+  .agreement-header h2{font-size:23pt;line-height:1;margin-bottom:2px}
+  .agreement-sub{font-size:10pt;line-height:1.2}
+  .agreement-meta{margin:7px 0 8px;padding:7px 9px;font-size:10pt;gap:8px}
+  .agreement-section{margin-bottom:8px}
+  .agreement-section h3{font-size:11pt;letter-spacing:.01em;margin-bottom:4px}
+  .print-table{font-size:8.9pt;line-height:1.12}
+  .print-table th,.print-table td{padding:3px 5px}
+  .print-table th{font-size:8.5pt}
+  .print-service-label{font-size:7.8pt;line-height:1.1;color:#444;margin-top:1px}
+  .agreement-totals{grid-template-columns:1fr 1fr;gap:10px}
+  .agreement-bottom-row{display:block}
+  .totals-box{padding:8px}
+  .totals-box h3{font-size:10.5pt;margin-bottom:4px}
+  .totals-box div{padding:4px 0}
+  .totals-box span{font-size:8.8pt}
+  .totals-box strong{font-size:12.5pt}
+  .detail-list{padding-left:14px;line-height:1.18}
+  .detail-list li{margin:0 0 2px}
+  .agreement-disclaimer{font-size:8.5pt;line-height:1.18}
+  .print-checkbox{font-size:9pt;line-height:1.15;margin-top:6px}
+  .checkbox input{width:13px;height:13px}
+  .signature-grid{grid-template-columns:1fr .36fr;gap:12px 12px;margin-top:40px}
+  .signature-line{padding-top:13px;min-height:34px;overflow:visible}
+  .signature-line span{font-size:8.2pt;line-height:1.25;padding-bottom:2px}
+  .panel,
+  .printable-agreement{
+    border-radius:0 !important;
+    border:none !important;
+    overflow:visible !important;
+  }
+  @page{size:letter portrait;margin:0.32in}
+}
+
+
+/* Version 14 final layout overrides */
+.hero{
+  flex-direction:column !important;
+  align-items:flex-start !important;
+}
+.hero-actions{
+  flex-direction:column !important;
+  width:100%;
+  max-width:320px;
+}
+.layout{
+  display:block !important;
+}
+.layout > .panel{
+  margin-bottom:18px;
+}
+.inputs{
+  position:static !important;
+  top:auto !important;
+}
+.grid.two,
+.grid.three,
+.cards,
+.cards.cards-four,
+.summary-grid{
+  grid-template-columns:1fr !important;
+}
+.summary{
+  grid-column:auto !important;
+}
+
+/* Version 14 print overrides */
+@media print{
+  .agreement-bottom-row{
+    display:block !important;
+  }
+  .signature-grid{
+    margin-top:40px !important;
+    grid-template-columns:1fr 120px !important;
+  }
+  .signature-line{
+    min-height:34px !important;
+    overflow:visible !important;
+  }
+  .signature-line span{
+    font-size:8.2pt !important;
+    line-height:1.25 !important;
+    padding-bottom:2px !important;
+  }
+  .panel,
+  .printable-agreement{
+    border-radius:0 !important;
+    border:none !important;
+    overflow:visible !important;
+  }
+}
+
+
+.noncovered-item-other{
+  grid-template-columns:minmax(180px,1fr) minmax(220px,1.2fr) auto;
+  align-items:end;
+}
+.other-fields{
+  display:grid;
+  grid-template-columns:1.4fr 120px;
+  gap:8px;
+  align-items:end;
+}
+@media (max-width:900px){
+  .noncovered-item-other,
+  .other-fields{
+    grid-template-columns:1fr;
+  }
+}
+
+
+/* Version 19 compact UI + spinal anatomy background */
+body{
+  background:
+    radial-gradient(circle at 15% 15%, rgba(15,123,108,.10), transparent 28%),
+    radial-gradient(circle at 85% 10%, rgba(17,50,77,.12), transparent 30%),
+    linear-gradient(135deg, rgba(244,247,251,.94), rgba(232,247,243,.88)),
+    var(--bg);
+  position:relative;
+}
+body::before{
+  content:"";
+  position:fixed;
+  inset:0;
+  pointer-events:none;
+  opacity:.10;
+  background-repeat:no-repeat;
+  background-position:right 4% top 105px;
+  background-size:360px auto;
+  background-image:url("data:image/svg+xml,%3Csvg width='220' height='720' viewBox='0 0 220 720' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' stroke='%2311324d' stroke-width='7' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M112 28 C88 74 129 103 104 151 C82 194 130 220 106 267 C82 314 135 341 108 390 C84 435 132 472 108 519 C86 561 128 603 106 680'/%3E%3Cpath d='M83 68 h58 M74 113 h66 M78 160 h56 M69 207 h69 M75 254 h55 M68 302 h70 M78 350 h55 M67 399 h70 M75 448 h56 M70 497 h65 M78 548 h52 M74 599 h55 M81 650 h45'/%3E%3Cpath d='M86 85 C52 83 35 67 24 43 M137 86 C171 80 189 65 199 42 M80 188 C46 186 30 170 18 146 M134 188 C168 183 189 166 203 143 M75 292 C40 290 27 272 15 249 M137 292 C172 287 190 269 205 246 M80 397 C45 394 29 377 17 353 M136 397 C171 392 190 374 204 351 M78 503 C45 499 30 483 18 460 M132 503 C166 497 187 479 201 456'/%3E%3C/g%3E%3C/svg%3E");
+  z-index:-1;
+}
+.app-shell{max-width:1280px;padding:18px}
+.hero{padding:18px;margin-bottom:14px;border-radius:14px}
+.hero h1{font-size:26px}
+.sub{font-size:13px}
+.panel{padding:13px;border-radius:14px}
+h2{font-size:18px;margin-bottom:9px}
+h3{font-size:15px;margin-bottom:8px}
+.helper{font-size:11px;margin-bottom:8px}
+label span{font-size:10px;margin-bottom:4px}
+input,select,button{font-size:11px;padding:7px 9px;border-radius:8px}
+select{min-height:150px}
+.noncovered-list{gap:6px;margin:7px 0 12px}
+.noncovered-item{padding:7px 9px;border-radius:10px;gap:7px}
+.table-wrap{border-radius:10px}
+table{font-size:11px}
+thead th{padding:7px}
+tbody td{padding:7px}
+.qty-input{width:72px}
+.cards{gap:10px;margin-bottom:12px}
+.card{padding:11px;border-radius:12px}
+.card .label{font-size:10px;margin-bottom:5px}
+.card strong{font-size:22px}
+.summary-grid{gap:14px}
+.detail-list{font-size:12px;line-height:1.35}
+.footer-note{margin-top:12px;padding:9px 10px;border-radius:10px;font-size:11px}
+.agreement-meta{font-size:11px;padding:8px;margin:8px 0 10px}
+.totals-box{padding:9px;border-radius:11px}
+.totals-box strong{font-size:16px}
+.layout{grid-template-columns:1fr;gap:12px}
+.inputs{position:static}
+.grid.two{grid-template-columns:repeat(4,minmax(0,1fr))}
+.grid.three{grid-template-columns:repeat(3,minmax(0,1fr))}
+.stack{grid-template-columns:repeat(4,minmax(0,1fr));display:grid}
+@media (max-width:900px){
+  .grid.two,.grid.three,.stack{grid-template-columns:1fr}
+  body::before{background-size:260px auto;background-position:right -40px top 160px}
+}
+@media print{
+  body::before{display:none !important}
+  body{background:#fff !important}
+}
+
+
+/* Version 21 transparent panels and compact non-covered controls */
+.panel{
+  background:rgba(255,255,255,.62);
+  backdrop-filter:blur(3px);
+  -webkit-backdrop-filter:blur(3px);
+}
+.card,.totals-box,.agreement-disclaimer-wrap,.agreement-meta,.table-wrap{
+  background:rgba(255,255,255,.72);
+}
+.noncovered-item{
+  padding:7px 9px;
+  border-radius:10px;
+  gap:7px;
+  font-size:11px;
+  background:rgba(255,255,255,.58);
+}
+.noncovered-item,.noncovered-item *{font-size:11px !important;}
+.noncovered-item input,.noncovered-item select,.noncovered-item button{
+  padding:7px 9px !important;
+  border-radius:8px !important;
+  font-size:11px !important;
+}
+.noncovered-qty{width:72px !important;}
+@media print{
+  .panel,.card,.totals-box,.agreement-disclaimer-wrap,.agreement-meta,.table-wrap,.noncovered-item{
+    background:#fff !important;
+    backdrop-filter:none !important;
+    -webkit-backdrop-filter:none !important;
+  }
+}
+
+</style>
+</head>
+<body>
+  <div class="app-shell">
+    <header class="hero">
+      <div>
+        <p class="eyebrow">Ready-to-run clinic app</p>
+        <h1>Financial Care Plan Generator</h1>
+        <p class="sub">Built from your uploaded fee schedule. Double-click <strong>Start Clinic App.bat</strong> to launch.</p>
+      </div>
+      <div class="hero-actions">
+        <button class="secondary" id="printBtn" type="button">Print / Save PDF</button>
+        <button id="resetBtn" type="button">Reset Standard Plan</button>
+      </div>
+    </header>
+
+    <main class="layout">
+      <section class="panel inputs">
+        <h2>Patient & Benefit Inputs</h2>
+        <div class="grid two">
+          <label>
+            <span>Clinic Name</span>
+            <input id="clinicName" type="text" placeholder="Chiropractic Company" value="Chiropractic Company">
+          </label>
+          <label>
+            <span>Patient Name</span>
+            <input id="patientName" type="text" placeholder="Patient name">
+          </label>
+          <label>
+            <span>Date</span>
+            <input id="planDate" type="date">
+          </label>
+          <label>
+            <span>Insurance Company</span>
+            <input id="insuranceSearch" type="text" placeholder="Search insurance name">
+            <select id="insuranceSelect" size="8"></select>
+          </label>
+          <div class="stack">
+            <label>
+              <span>Deductible Remaining ($)</span>
+              <input id="deductible" type="number" min="0" step="0.01" value="0">
+            </label>
+            <label>
+              <span>Patient Coinsurance (%)</span>
+              <input id="coinsurance" type="number" min="0" max="100" step="1" value="0">
+            </label>
+            <label>
+              <span>Copay per Visit ($)</span>
+              <input id="copay" type="number" min="0" step="0.01" value="0">
+            </label>
+            <label>
+              <span>Copay Visit Count</span>
+              <input id="copayVisits" type="number" min="0" step="1" value="24">
+            </label>
+          </div>
+        </div>
+
+        <h3>Non-covered / Self-Pay Items</h3>
+        <div class="helper">Enter a quantity for any non-covered or discounted self-pay item you want included.</div>
+        <div id="nonCoveredList" class="noncovered-list"></div>
+<div class="grid three">
+          <label>
+            <span>Pay-in-Full Discount (%)</span>
+            <input id="payInFullDiscount" type="number" min="0" max="100" step="1" value="10">
+          </label>
+          <label>
+            <span>Payment Plan A (months)</span>
+            <input id="monthsA" type="number" min="1" step="1" value="3">
+          </label>
+          <label>
+            <span>Payment Plan B (months)</span>
+            <input id="monthsB" type="number" min="1" step="1" value="6">
+          </label>
+        </div>
+      </section>
+
+      <section class="panel plan-panel">
+        <div class="row-space">
+          <h2>Recommended Service Plan</h2>
+          <button class="secondary" id="recalculateBtn" type="button">Recalculate</button>
+        </div>
+        <p class="helper">Edit quantities if the recommendation changes. Standard 24-visit corrective plan is preloaded.</p>
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr>
+                <th>Category</th>
+                <th>CPT</th>
+                <th>Qty</th>
+                <th>Allowed / Unit</th>
+                <th>Covered Subtotal</th>
+                <th>Notes</th>
+              </tr>
+            </thead>
+            <tbody id="planTableBody"></tbody>
+          </table>
+        </div>
+      </section>
+
+      <section class="panel summary">
+        <div class="summary-header">
+          <div>
+            <h2>Financial Summary</h2>
+            <p class="helper compact">Review totals below, then use Print / Save PDF for the patient-facing one-page agreement.</p>
+          </div>
+          <div class="estimate-check">
+            <label class="checkbox">
+              <input id="estimateAcknowledge" type="checkbox">
+              <span>I understand this is an estimate.</span>
+            </label>
+          </div>
+        </div>
+
+        <div class="cards cards-four">
+          <div class="card">
+            <span class="label">Total Cost at Full Fees</span>
+            <strong id="fullFeeTotal">$0.00</strong>
+          </div>
+          <div class="card">
+            <span class="label">Total Allowed Amount</span>
+            <strong id="coveredTotal">$0.00</strong>
+          </div>
+          <div class="card">
+            <span class="label">Estimated Insurance Portion</span>
+            <strong id="insurancePortion">$0.00</strong>
+          </div>
+          <div class="card accent">
+            <span class="label">Estimated Patient Responsibility</span>
+            <strong id="patientResponsibility">$0.00</strong>
+          </div>
+        </div>
+
+        <div class="summary-grid">
+          <div>
+            <h3>Estimate Details</h3>
+            <ul id="detailList" class="detail-list"></ul>
+          </div>
+          <div>
+            <h3>Payment Options</h3>
+            <ul id="paymentList" class="detail-list"></ul>
+          </div>
+        </div>
+
+        <h3>Assumptions & Flags</h3>
+        <ul id="assumptionList" class="detail-list"></ul>
+
+        <div class="footer-note">
+          <p><strong>Important:</strong> This is an estimate based on the uploaded fee schedule and the benefit inputs entered above. Final adjudication depends on the payer, deductible status, authorization rules, and claim processing.</p>
+        </div>
+      </section>
+    </main>
+      <section class="panel printable-agreement" id="printAgreement">
+        <div class="agreement-header one-page">
+          <div class="agreement-brand agreement-brand-no-logo">
+<div>
+              <p class="agreement-kicker">Financial Care Plan Agreement</p>
+              <h2 id="printClinicName">Chiropractic Company</h2>
+              <p class="agreement-sub">Estimate prepared for Report of Findings review. Please review and sign below.</p>
+            </div>
+          </div>
+        </div>
+
+        <div class="agreement-meta">
+          <div><strong>Patient:</strong> <span id="printPatientName">Not entered</span></div>
+          <div><strong>Date:</strong> <span id="printDate">—</span></div>
+          <div><strong>Insurance:</strong> <span id="printInsurance">—</span></div>
+        </div>
+
+        <div class="agreement-section">
+          <h3>Recommended Services Included in This Plan</h3>
+          <table class="print-table">
+            <thead>
+              <tr>
+                <th>Category</th>
+                <th>Service</th>
+                <th>Units</th>
+                <th>Full Fee / Unit</th>
+                <th>Allowed / Unit</th>
+                <th>Allowed Total</th>
+              </tr>
+            </thead>
+            <tbody id="printServicesBody"></tbody>
+          </table>
+        </div>
+
+        <div class="agreement-section agreement-totals">
+          <div class="totals-box">
+            <div><span>Total cost at full fees</span><strong id="printFullFeeTotal">$0.00</strong></div>
+            <div><span>Total allowed amount</span><strong id="printCoveredTotal">$0.00</strong></div>
+            <div><span>Estimated patient responsibility</span><strong id="printPatientResponsibility">$0.00</strong></div>
+          </div>
+          <div class="totals-box">
+            <h3>Payment Options</h3>
+            <ul id="printPaymentList" class="detail-list"></ul>
+          </div>
+        </div>
+
+        <div class="agreement-section">
+          <h3>Non-Covered Items Selected</h3>
+          <ul id="printNonCoveredList" class="detail-list"></ul>
+        </div>
+
+        <div class="agreement-section agreement-bottom-row">
+          <div class="agreement-disclaimer-wrap">
+            <p class="agreement-disclaimer"><strong>Estimate disclaimer:</strong> This financial care plan is an estimate based on the selected payer fee schedule and the benefits entered in the app. Final patient responsibility may change after claims are processed, based on deductible status, coinsurance, authorization rules, and payer adjudication.</p>
+            <label class="checkbox print-checkbox">
+              <input id="printEstimateAcknowledge" type="checkbox" disabled>
+              <span>I understand this is an estimate.</span>
+            </label>
+          </div>
+
+          <div class="signature-grid">
+          <div class="signature-line">
+            <span>Patient / Responsible Party Signature</span>
+          </div>
+          <div class="signature-line">
+            <span>Date</span>
+          </div>
+
+        </div>
+        </div>
+      </section>
+
+  </div>
+
+  <script>
+window.CLINIC_APP_DATA = {"generatedFrom":"Fee Schedule - Updated 07.01.2026.xlsx","generatedOn":"2026-07-01","insuranceCompanies":["AETNA IN-NETWORK \"HIGH\" (FRANKLIN, GRAFTON, MENOMONEE FALLS, NEW BERLIN, WAUKESHA, WEST ALLIS NORTH)","AETNA IN-NETWORK \"LOW\" (CUDAHY, GREENFIELD, HALES CORNERS, WEST ALLIS)","AETNA OUT OF NETWORK (BROOKFIELD, CEDARBURG, GERMANTOWN, GLENDALE, MEQUON, MKE EAST, MKE NORTH, MKE THIRD WARD, MUSKEGO, OCONOMOWOC, SHOREWOOD)","ALLIED BENEFIT SERVICES","AMBETTER","ANTHEM IN NETWORK","ANTHEM IN NETWORK WITH AIM","ANTHEM MEDICARE COMPLETE","CENTIVO","CIGNA/CIGNA GW HEALTH","COMMON GROUND","DEAN HEALTH PLAN (First Health Commercial)","FIRST HEALTH COMMERCIAL","FORWARD HEALTH","FORWARD HEALTH/MY CHOICE","FULCRUM (THE ALLIANCE)","HEALTH PARTNERS COMMMERCIAL (OPTUM)","HPS","HUMANA (ALL CLINICS EXCEPT OCONOMOWOC)","HUMANA (OCONOMOWOC)","HUMANA MEDICARE COMPLETE","iCARE","INTEGRATED HEALTH NETWORK","THE LOOMIS COMPANY","MEDICARE*","MOLINA MARKETPLACE/2022","MULTIPLAN/PHCS/HEALTH EOS","NETWORK HEALTH","NETWORK HEALTH - FROEDERT EMPLOYEE PLAN","NETWORK HEALTH MED COMPLETE","OPTUM","OPTUM VA","OWCP/Department of Labor","QUARTZ ASO or ALIGN","QUARTZ COMMERCIAL (HMO/POS) AKA QHBPC","QUARTZ HEALTH EOS BY MULTIPLAN","QUARTZ SENIOR PREFERRED*","TRILOGY, ASSURANT HEALTH, PRARIE STATES","MERITAIN AURORA DIRECT","UMR PROHEALTH CARE","WAC EMPLOYEE","WPS COMMERCIAL (CMS)"],"cptCatalog":[{"code":"72040","category":"1ST DAY (XRAYS)"},{"code":"72050","category":"1ST DAY (XRAYS)"},{"code":"72070","category":"1ST DAY (XRAYS)"},{"code":"72100","category":"1ST DAY (XRAYS)"},{"code":"72110","category":"1ST DAY (XRAYS)"},{"code":"97010","category":"THERAPIES"},{"code":"97012","category":"THERAPIES"},{"code":"97014","category":"THERAPIES"},{"code":"G0283","category":"THERAPIES"},{"code":"97026","category":"THERAPIES"},{"code":"97035","category":"THERAPIES"},{"code":"97039","category":"THERAPIES"},{"code":"97110","category":"THERAPIES"},{"code":"97112","category":"THERAPIES"},{"code":"97124","category":"THERAPIES"},{"code":"97140","category":"THERAPIES"},{"code":"97530","category":"THERAPIES"},{"code":"98940","category":"SPINAL ADJUSTMENTS"},{"code":"98941","category":"SPINAL ADJUSTMENTS"},{"code":"98943","category":"EXTREMITY ADJUSTMENTS"},{"code":"99202","category":"1ST DAY (EXAMS)"},{"code":"99203","category":"1ST DAY (EXAMS)"},{"code":"99212","category":"EVALUATION & MANAGEMENT"},{"code":"99213","category":"EVALUATION & MANAGEMENT"}],"feeSchedules":{"AETNA IN-NETWORK \"HIGH\" (FRANKLIN, GRAFTON, MENOMONEE FALLS, NEW BERLIN, WAUKESHA, WEST ALLIS NORTH)":{"72040":59.29,"72050":79.88,"72070":49.26,"72100":59.79,"72110":76.86,"97010":4.86,"97012":11.38,"97014":9.72,"G0283":9.46,"97026":5.12,"97035":11.33,"97039":10.03,"97110":23.39,"97112":26.85,"97124":23.77,"97140":21.54,"97530":29.37,"98940":21.29,"98941":28.29,"98943":19.68,"99202":62.16,"99203":95.62,"99212":48.58,"99213":77.69},"AETNA IN-NETWORK \"LOW\" (CUDAHY, GREENFIELD, HALES CORNERS, WEST ALLIS)":{"72040":27.92,"72050":39.52,"72070":25.78,"72100":29.26,"72110":40.86,"97010":3.0,"97012":9.19,"97014":8.42,"G0283":9.46,"97026":3.26,"97035":7.38,"97039":10.03,"97110":17.86,"97112":18.23,"97124":14.14,"97140":16.45,"97530":18.64,"98940":21.29,"98941":28.29,"98943":19.68,"99202":46.28,"99203":67.33,"99212":26.96,"99213":44.69},"AETNA OUT OF NETWORK (BROOKFIELD, CEDARBURG, GERMANTOWN, GLENDALE, MEQUON, MKE EAST, MKE NORTH, MKE THIRD WARD, MUSKEGO, OCONOMOWOC, SHOREWOOD)":{"72040":46.49,"72050":63.03,"72070":38.61,"72100":46.88,"72110":61.05,"97010":0.0,"97012":16.64,"97014":0.0,"G0283":14.6,"97026":7.69,"97035":16.56,"97039":0.0,"97110":35.0,"97112":40.19,"97124":36.0,"97140":32.23,"97530":43.6,"98940":48.0,"98941":56.0,"98943":42.0,"99202":84.59,"99203":94.29,"99212":66.29,"99213":100.0},"ALLIED BENEFIT SERVICES":{"72040":50.0,"72050":null,"72070":null,"72100":50.43,"72110":null,"97010":null,"97012":15.66,"97014":18.4,"G0283":13.05,"97026":7.87,"97035":14.23,"97039":null,"97110":39.22,"97112":null,"97124":null,"97140":null,"97530":null,"98940":34.54,"98941":49.92,"98943":null,"99202":null,"99203":138.66,"99212":null,"99213":null},"AMBETTER":{"72040":null,"72050":null,"72070":null,"72100":null,"72110":null,"97010":null,"97012":null,"97014":null,"G0283":null,"97026":null,"97035":null,"97039":null,"97110":null,"97112":null,"97124":null,"97140":null,"97530":null,"98940":null,"98941":null,"98943":null,"99202":null,"99203":null,"99212":null,"99213":null},"ANTHEM IN NETWORK":{"72040":38.25,"72050":51.53,"72070":31.78,"72100":38.57,"72110":49.59,"97010":4.98,"97012":11.66,"97014":5.0,"G0283":11.68,"97026":5.25,"97035":11.61,"97039":10.41,"97110":23.97,"97112":27.51,"97124":24.36,"97140":22.07,"97530":30.1,"98940":22.38,"98941":32.35,"98943":20.77,"99202":69.07,"99203":106.25,"99212":53.98,"99213":86.32},"ANTHEM IN NETWORK WITH AIM":{"72040":38.25,"72050":51.53,"72070":31.78,"72100":38.57,"72110":49.59,"97010":4.98,"97012":25.0,"97014":null,"G0283":25.0,"97026":5.25,"97035":11.61,"97039":10.41,"97110":23.97,"97112":27.51,"97124":24.36,"97140":22.07,"97530":30.1,"98940":22.38,"98941":32.35,"98943":20.77,"99202":69.07,"99203":106.25,"99212":53.98,"99213":86.32},"ANTHEM MEDICARE COMPLETE":{"72040":null,"72050":null,"72070":null,"72100":null,"72110":null,"97010":null,"97012":null,"97014":null,"G0283":null,"97026":null,"97035":null,"97039":null,"97110":null,"97112":null,"97124":null,"97140":null,"97530":null,"98940":26.01,"98941":37.55,"98943":null,"99202":null,"99203":null,"99212":null,"99213":null},"CENTIVO":{"72040":56.91,"72050":78.77,"72070":47.28,"72100":57.39,"72110":76.35,"97010":null,"97012":20.82,"97014":null,"G0283":18.29,"97026":9.41,"97035":20.76,"97039":0.0,"97110":42.38,"97112":47.76,"97124":43.13,"97140":40.41,"97530":51.0,"98940":39.02,"98941":56.33,"98943":37.89,"99202":107.67,"99203":167.1,"99212":84.96,"99213":136.59},"CIGNA/CIGNA GW HEALTH":{"72040":36.74,"72050":50.12,"72070":30.52,"72100":36.74,"72110":48.25,"97010":6.38,"97012":14.45,"97014":12.4,"G0283":12.5,"97026":6.7,"97035":14.7,"97039":13.42,"97110":29.37,"97112":32.7,"97124":30.2,"97140":27.72,"97530":35.21,"98940":27.11,"98941":39.5,"98943":25.06,"99202":60.07,"99203":92.98,"99212":47.33,"99213":76.42},"COMMON GROUND":{"72040":36.0,"72050":48.0,"72070":30.0,"72100":36.0,"72110":null,"97010":0.0,"97012":12.0,"97014":10.0,"G0283":8.0,"97026":4.0,"97035":10.0,"97039":null,"97110":10.0,"97112":10.0,"97124":10.0,"97140":null,"97530":0.0,"98940":27.0,"98941":39.0,"98943":23.0,"99202":36.0,"99203":51.0,"99212":21.0,"99213":29.0},"DEAN HEALTH PLAN (First Health Commercial)":{"72040":47.26,"72050":64.08,"72070":39.26,"72100":47.66,"72110":62.06,"97010":0.0,"97012":16.91,"97014":0.0,"G0283":14.6,"97026":7.81,"97035":16.84,"97039":0.0,"97110":35.59,"97112":40.85,"97124":36.6,"97140":32.76,"97530":44.33,"98940":48.0,"98941":56.0,"98943":42.0,"99202":85.99,"99203":132.09,"99212":67.39,"99213":108.43},"FIRST HEALTH COMMERCIAL":{"72040":47.26,"72050":64.08,"72070":39.26,"72100":47.66,"72110":62.06,"97010":0.0,"97012":16.91,"97014":0.0,"G0283":14.6,"97026":7.81,"97035":16.84,"97039":0.0,"97110":35.59,"97112":40.85,"97124":36.6,"97140":32.76,"97530":44.33,"98940":48.0,"98941":56.0,"98943":42.0,"99202":85.99,"99203":132.09,"99212":67.39,"99213":108.43},"FORWARD HEALTH":{"72040":35.07,"72050":49.09,"72070":31.45,"72100":36.91,"72110":50.86,"97010":0.0,"97012":13.73,"97014":0.0,"G0283":14.42,"97026":14.42,"97035":12.76,"97039":14.42,"97110":17.29,"97112":17.29,"97124":17.29,"97140":25.53,"97530":18.95,"98940":19.13,"98941":27.54,"98943":28.86,"99202":48.35,"99203":74.37,"99212":37.78,"99213":60.43},"FORWARD HEALTH/MY CHOICE":{"72040":35.07,"72050":49.09,"72070":31.45,"72100":36.91,"72110":50.86,"97010":0.0,"97012":0.0,"97014":0.0,"G0283":0.0,"97026":0.0,"97035":0.0,"97039":0.0,"97110":0.0,"97112":0.0,"97124":0.0,"97140":0.0,"97530":0.0,"98940":19.13,"98941":27.54,"98943":null,"99202":48.35,"99203":74.37,"99212":37.78,"99213":60.43},"FULCRUM (THE ALLIANCE)":{"72040":42.38,"72050":56.77,"72070":40.7,"72100":39.65,"72110":62.09,"97010":null,"97012":17.13,"97014":14.22,"G0283":14.22,"97026":0.0,"97035":13.71,"97039":0.0,"97110":32.8,"97112":28.44,"97124":26.13,"97140":36.0,"97530":30.02,"98940":30.46,"98941":37.54,"98943":25.72,"99202":57.25,"99203":84.12,"99212":33.61,"99213":45.16},"HEALTH PARTNERS COMMMERCIAL (OPTUM)":{"72040":0.0,"72050":null,"72070":0.0,"72100":0.0,"72110":null,"97010":0.0,"97012":0.0,"97014":null,"G0283":0.0,"97026":null,"97035":0.0,"97039":null,"97110":0.0,"97112":0.0,"97124":0.0,"97140":null,"97530":0.0,"98940":50.0,"98941":50.0,"98943":0.0,"99202":null,"99203":50.0,"99212":0.0,"99213":0.0},"HPS":{"72040":69.44,"72050":117.6,"72070":75.87,"72100":78.3,"72110":119.62,"97010":19.77,"97012":19.77,"97014":19.77,"G0283":18.78,"97026":19.77,"97035":19.77,"97039":null,"97110":19.77,"97112":19.77,"97124":19.77,"97140":19.77,"97530":29.18,"98940":40.75,"98941":51.37,"98943":39.76,"99202":59.24,"99203":82.29,"99212":37.04,"99213":53.48},"HUMANA (ALL CLINICS EXCEPT OCONOMOWOC)":{"72040":32.69,"72050":44.14,"72070":27.12,"72100":32.97,"72110":23.92,"97010":4.9,"97012":11.94,"97014":10.37,"G0283":10.09,"97026":5.18,"97035":11.81,"97039":0.0,"97110":24.5,"97112":28.46,"97124":24.79,"97140":22.53,"97530":30.85,"98940":28.0,"98941":36.0,"98943":27.0,"99202":59.18,"99203":90.66,"99212":45.88,"99213":74.03},"HUMANA (OCONOMOWOC)":{"72040":37.19,"72050":50.42,"72070":30.89,"72100":33.59,"72110":48.84,"97010":5.83,"97012":13.31,"97014":11.64,"G0283":11.02,"97026":6.15,"97035":13.25,"97039":0.0,"97110":28.0,"97112":32.15,"97124":28.8,"97140":25.78,"97530":34.88,"98940":38.0,"98941":46.0,"98943":37.0,"99202":67.67,"99203":103.95,"99212":53.03,"99213":85.33},"HUMANA MEDICARE COMPLETE":{"72040":null,"72050":null,"72070":null,"72100":null,"72110":null,"97010":null,"97012":null,"97014":null,"G0283":null,"97026":null,"97035":null,"97039":null,"97110":null,"97112":null,"97124":null,"97140":null,"97530":null,"98940":26.01,"98941":37.55,"98943":null,"99202":null,"99203":null,"99212":null,"99213":null},"iCARE":{"72040":null,"72050":null,"72070":null,"72100":null,"72110":null,"97010":null,"97012":null,"97014":null,"G0283":null,"97026":null,"97035":null,"97039":null,"97110":null,"97112":null,"97124":null,"97140":null,"97530":null,"98940":26.01,"98941":37.55,"98943":null,"99202":null,"99203":null,"99212":null,"99213":null},"INTEGRATED HEALTH NETWORK":{"72040":48.0,"72050":null,"72070":48.0,"72100":48.0,"72110":null,"97010":12.0,"97012":15.0,"97014":18.0,"G0283":null,"97026":12.0,"97035":18.0,"97039":null,"97110":27.0,"97112":27.0,"97124":18.0,"97140":null,"97530":33.0,"98940":39.6,"98941":45.6,"98943":36.0,"99202":null,"99203":69.0,"99212":30.0,"99213":42.0},"THE LOOMIS COMPANY":{"72040":47.24,"72050":null,"72070":null,"72100":47.65,"72110":null,"97010":null,"97012":18.01,"97014":16.2,"G0283":15.79,"97026":null,"97035":null,"97039":null,"97110":36.33,"97112":null,"97124":null,"97140":33.39,"97530":null,"98940":34.16,"98941":49.18,"98943":32.5,"99202":86.93,"99203":133.76,"99212":67.34,"99213":109.35},"MEDICARE*":{"72040":null,"72050":null,"72070":null,"72100":null,"72110":null,"97010":null,"97012":null,"97014":null,"G0283":null,"97026":null,"97035":null,"97039":null,"97110":null,"97112":null,"97124":null,"97140":null,"97530":null,"98940":26.01,"98941":37.55,"98943":null,"99202":null,"99203":null,"99212":null,"99213":null},"MOLINA MARKETPLACE/2022":{"72040":36.52,"72050":48.58,"72070":30.33,"72100":36.52,"72110":46.51,"97010":null,"97012":13.56,"97014":12.38,"G0283":10.89,"97026":6.03,"97035":13.16,"97039":null,"97110":28.28,"97112":32.49,"97124":28.72,"97140":26.35,"97530":34.59,"98940":26.3,"98941":37.86,"98943":19.01,"99202":60.41,"99203":90.6,"99212":43.42,"99213":71.89},"MULTIPLAN/PHCS/HEALTH EOS":{"72040":58.74,"72050":85.47,"72070":61.56,"72100":62.69,"72110":85.83,"97010":12.09,"97012":20.29,"97014":20.57,"G0283":18.43,"97026":7.46,"97035":19.71,"97039":10.94,"97110":27.13,"97112":26.17,"97124":22.11,"97140":17.13,"97530":25.29,"98940":40.39,"98941":53.11,"98943":34.79,"99202":78.69,"99203":86.97,"99212":36.83,"99213":46.62},"NETWORK HEALTH":{"72040":90.0,"72050":120.0,"72070":60.0,"72100":60.0,"72110":120.0,"97010":18.0,"97012":30.0,"97014":30.0,"G0283":30.0,"97026":30.0,"97035":30.0,"97039":30.0,"97110":45.0,"97112":45.0,"97124":36.0,"97140":36.0,"97530":45.0,"98940":63.0,"98941":69.0,"98943":45.0,"99202":90.0,"99203":120.0,"99212":60.0,"99213":90.0},"NETWORK HEALTH - FROEDERT EMPLOYEE PLAN":{"72040":55.0,"72050":75.0,"72070":55.0,"72100":55.0,"72110":35.0,"97010":0.0,"97012":20.0,"97014":20.0,"G0283":20.0,"97026":20.0,"97035":20.0,"97039":null,"97110":25.0,"97112":20.0,"97124":20.0,"97140":20.0,"97530":null,"98940":40.0,"98941":45.0,"98943":30.0,"99202":55.0,"99203":65.0,"99212":25.0,"99213":45.0},"NETWORK HEALTH MED COMPLETE":{"72040":null,"72050":null,"72070":null,"72100":null,"72110":null,"97010":null,"97012":null,"97014":null,"G0283":null,"97026":null,"97035":null,"97039":null,"97110":null,"97112":null,"97124":null,"97140":null,"97530":null,"98940":26.01,"98941":37.55,"98943":null,"99202":null,"99203":null,"99212":null,"99213":null},"OPTUM":{"72040":0.0,"72050":null,"72070":0.0,"72100":0.0,"72110":null,"97010":0.0,"97012":0.0,"97014":null,"G0283":0.0,"97026":null,"97035":0.0,"97039":null,"97110":0.0,"97112":0.0,"97124":0.0,"97140":null,"97530":0.0,"98940":50.0,"98941":50.0,"98943":0.0,"99202":null,"99203":50.0,"99212":0.0,"99213":0.0},"OPTUM VA":{"72040":37.94,"72050":52.51,"72070":31.52,"72100":38.26,"72110":50.9,"97010":0.0,"97012":13.88,"97014":0.0,"G0283":12.196,"97026":6.27,"97035":13.84,"97039":null,"97110":28.25,"97112":31.84,"97124":28.75,"97140":26.94,"97530":34.0,"98940":26.01,"98941":37.55,"98943":22.91,"99202":71.78,"99203":111.4,"99212":56.64,"99213":91.06},"OWCP/Department of Labor":{"72040":64.01,"72050":87.32,"72070":53.17,"72100":64.01,"72110":84.06,"97010":0.0,"97012":22.06,"97014":18.93,"G0283":19.88,"97026":10.23,"97035":21.48,"97039":0.0,"97110":44.83,"97112":49.9,"97124":46.1,"97140":42.31,"97530":53.74,"98940":41.38,"98941":60.3,"98943":0.0,"99202":106.97,"99203":165.57,"99212":83.95,"99213":136.08},"QUARTZ ASO or ALIGN":{"72040":59.1,"72050":113.8,"72070":75.36,"72100":75.36,"72110":132.98,"97010":null,"97012":14.42,"97014":14.42,"G0283":14.42,"97026":14.42,"97035":14.42,"97039":null,"97110":20.6,"97112":20.6,"97124":23.17,"97140":20.6,"97530":20.6,"98940":38.3,"98941":50.83,"98943":30.64,"99202":46.35,"99203":61.8,"99212":30.9,"99213":46.35},"QUARTZ COMMERCIAL (HMO/POS) AKA QHBPC":{"72040":64.58,"72050":124.35,"72070":82.35,"72100":82.35,"72110":145.3,"97010":0.0,"97012":15.76,"97014":15.76,"G0283":15.76,"97026":15.76,"97035":15.76,"97039":0.0,"97110":22.51,"97112":22.51,"97124":25.32,"97140":22.51,"97530":22.51,"98940":41.84,"98941":55.54,"98943":33.48,"99202":50.65,"99203":67.53,"99212":33.75,"99213":50.65},"QUARTZ HEALTH EOS BY MULTIPLAN":{"72040":58.16,"72050":84.63,"72070":60.95,"72100":62.06,"72110":84.98,"97010":11.97,"97012":20.09,"97014":20.36,"G0283":18.25,"97026":7.38,"97035":19.51,"97039":10.83,"97110":26.87,"97112":25.91,"97124":21.89,"97140":16.96,"97530":25.04,"98940":39.99,"98941":52.58,"98943":34.44,"99202":77.91,"99203":86.11,"99212":36.46,"99213":46.16},"QUARTZ SENIOR PREFERRED*":{"72040":null,"72050":null,"72070":null,"72100":null,"72110":null,"97010":null,"97012":null,"97014":null,"G0283":null,"97026":null,"97035":null,"97039":null,"97110":null,"97112":null,"97124":null,"97140":null,"97530":null,"98940":26.01,"98941":37.55,"98943":null,"99202":null,"99203":null,"99212":null,"99213":null},"TRILOGY, ASSURANT HEALTH, PRARIE STATES":{"72040":77.37,"72050":131.01,"72070":84.51,"72100":87.27,"72110":133.28,"97010":22.01,"97012":22.01,"97014":22.01,"G0283":32.5,"97026":22.01,"97035":22.01,"97039":null,"97110":22.01,"97112":22.01,"97124":22.01,"97140":22.01,"97530":32.5,"98940":45.39,"98941":55.94,"98943":44.32,"99202":66.01,"99203":91.7,"99212":41.27,"99213":59.62},"MERITAIN AURORA DIRECT":{"72040":84.65,"72050":113.59,"72070":69.84,"72100":85.39,"72110":109.13,"97010":13.01,"97012":32.28,"97014":29.03,"G0283":28.29,"97026":13.75,"97035":31.36,"97039":0.0,"97110":65.09,"97112":75.0,"97124":63.66,"97140":59.83,"97530":75.0,"98940":41.81,"98941":60.19,"98943":39.78,"99202":106.4,"99203":163.73,"99212":82.42,"99213":133.84},"UMR PROHEALTH CARE":{"72040":105.0,"72050":140.0,"72070":70.0,"72100":70.0,"72110":140.0,"97010":21.0,"97012":35.0,"97014":35.0,"G0283":35.0,"97026":35.0,"97035":35.0,"97039":35.0,"97110":52.5,"97112":52.5,"97124":42.0,"97140":42.0,"97530":52.5,"98940":73.5,"98941":80.5,"98943":52.5,"99202":105.0,"99203":140.0,"99212":70.0,"99213":105.0},"WAC EMPLOYEE":{"72040":0.0,"72050":null,"72070":0.0,"72100":0.0,"72110":null,"97010":0.0,"97012":0.0,"97014":0.0,"G0283":null,"97026":null,"97035":0.0,"97039":null,"97110":null,"97112":0.0,"97124":0.0,"97140":null,"97530":0.0,"98940":25.0,"98941":25.0,"98943":0.0,"99202":null,"99203":25.0,"99212":0.0,"99213":0.0},"WPS COMMERCIAL (CMS)":{"72040":37.37,"72050":53.23,"72070":35.86,"72100":39.26,"72110":54.74,"97010":4.91,"97012":13.88,"97014":12.19,"G0283":12.19,"97026":0.0,"97035":12.08,"97039":0.0,"97110":28.25,"97112":21.33,"97124":23.03,"97140":19.17,"97530":27.2,"98940":26.01,"98941":37.55,"98943":25.26,"99202":42.98,"99203":60.19,"99212":56.64,"99213":91.06}},"specialNotes":{"*":"Anthem with AIM does not cover these charges; they are patient cash charges.","**":"Allowed amount is 50% of the charge.","***":"Anthem does not cover re-exams."},"insurerCodeNotes":{"ANTHEM IN NETWORK":{"97039":"Allowed amount is 50% of the charge.","99212":"Anthem does not cover re-exams.","99213":"Anthem does not cover re-exams."},"ANTHEM IN NETWORK WITH AIM":{"97012":"Anthem with AIM does not cover these charges; they are patient cash charges.","97014":"Not covered / n/a","G0283":"Anthem with AIM does not cover these charges; they are patient cash charges.","97039":"Allowed amount is 50% of the charge.","99212":"Anthem does not cover re-exams.","99213":"Anthem does not cover re-exams."},"MEDICARE*":{"98940":"Allowed amount is 50% of the charge.","98941":"Allowed amount is 50% of the charge."}},"standardPlan":{"99203":1,"72040":1,"72100":1,"98941":24,"98943":24,"97110":24,"G0283":12,"97012":12,"99213":3},"nonCoveredDefaults":[{"id":"radiologist","label":"Radiologist Fee","amount":60,"defaultQty":1},{"id":"stimpads","label":"Stim Pad Fee","amount":15.82,"defaultQty":1},{"id":"orthotics","label":"Custom Orthotics","amount":339,"defaultQty":1},{"id":"orthotics2pair","label":"Custom Orthotics (2 Pairs)","amount":559,"defaultQty":0},{"id":"nc98941","label":"98941 Self-Pay","amount":59,"defaultQty":0},{"id":"nc98943","label":"98943 Self-Pay","amount":17,"defaultQty":0},{"id":"nc97110","label":"97110 Self-Pay","amount":25,"defaultQty":0},{"id":"ncG0283","label":"G0283 Self-Pay","amount":25,"defaultQty":0},{"id":"nc97012","label":"97012 Self-Pay","amount":25,"defaultQty":0},{"id":"nc99213","label":"99213 Self-Pay","amount":100,"defaultQty":0},{"id":"nc99203","label":"99203 Self-Pay","amount":200,"defaultQty":0},{"id":"supportiveEM","label":"Supportive E/M","amount":25,"defaultQty":0}],"planAssumptions":["99213-25 is estimated using the 99213 fee schedule amount because the workbook lists 99213 rather than 99213-25.","Blank fee schedule cells are treated as not covered / no estimate available."]};
+</script>
+  <script>
+
+(function(){
+  const data = window.CLINIC_APP_DATA;
+  const insuranceSelect = document.getElementById('insuranceSelect');
+  const insuranceSearch = document.getElementById('insuranceSearch');
+  const planTableBody = document.getElementById('planTableBody');
+  const nonCoveredList = document.getElementById('nonCoveredList');
+  const OTHER_STORAGE_KEY = 'clinicAppOtherEntries';
+  const planDate = document.getElementById('planDate');
+  const clinicName = document.getElementById('clinicName');
+  const patientName = document.getElementById('patientName');
+  const deductibleInput = document.getElementById('deductible');
+  const coinsuranceInput = document.getElementById('coinsurance');
+  const copayInput = document.getElementById('copay');
+  const copayVisitsInput = document.getElementById('copayVisits');
+  const payInFullDiscountInput = document.getElementById('payInFullDiscount');
+  const monthsAInput = document.getElementById('monthsA');
+  const monthsBInput = document.getElementById('monthsB');
+
+  const fullFeeTotalEl = document.getElementById('fullFeeTotal');
+  const coveredTotalEl = document.getElementById('coveredTotal');
+  const insurancePortionEl = document.getElementById('insurancePortion');
+  const patientResponsibilityEl = document.getElementById('patientResponsibility');
+  const detailList = document.getElementById('detailList');
+  const paymentList = document.getElementById('paymentList');
+  const assumptionList = document.getElementById('assumptionList');
+  const estimateAcknowledge = document.getElementById('estimateAcknowledge');
+
+  const printClinicName = document.getElementById('printClinicName');
+  const printPatientName = document.getElementById('printPatientName');
+  const printDate = document.getElementById('printDate');
+  const printInsurance = document.getElementById('printInsurance');
+  const printServicesBody = document.getElementById('printServicesBody');
+  const printFullFeeTotal = document.getElementById('printFullFeeTotal');
+  const printCoveredTotal = document.getElementById('printCoveredTotal');
+  const printPatientResponsibility = document.getElementById('printPatientResponsibility');
+  const printPaymentList = document.getElementById('printPaymentList');
+  const printNonCoveredList = document.getElementById('printNonCoveredList');
+  const printEstimateAcknowledge = document.getElementById('printEstimateAcknowledge');
+
+  const state = {
+    quantities: {},
+    nonCoveredQty: {},
+    insurance: null
+  };
+
+  const currency = new Intl.NumberFormat('en-US',{style:'currency',currency:'USD'});
+
+  const serviceLabels = {
+    '72040': 'Cervical Spine X-Ray',
+    '72050': 'Cervical Spine X-Ray Series',
+    '72070': 'Thoracic Spine X-Ray',
+    '72100': 'Lumbar Spine X-Ray',
+    '72110': 'Lumbar Spine X-Ray Series',
+    '97010': 'Hot / Cold Therapy',
+    '97012': 'Mechanical Traction',
+    '97014': 'Electrical Stimulation',
+    'G0283': 'Electrical Stimulation',
+    '97026': 'Infrared Therapy',
+    '97035': 'Ultrasound Therapy',
+    '97039': 'Unlisted Modality',
+    '97110': 'Therapeutic Exercise',
+    '97112': 'Neuromuscular Re-education',
+    '97124': 'Massage Therapy',
+    '97140': 'Manual Therapy',
+    '97530': 'Therapeutic Activities',
+    '98940': 'Spinal Adjustment',
+    '98941': 'Spinal Adjustment',
+    '98943': 'Extremity Adjustment',
+    '99202': 'New Patient Exam',
+    '99203': 'New Patient Exam',
+    '99212': 'Established Patient Exam',
+    '99213': 'Established Patient Exam'
+  };
+
+  const fullFeeSchedule = {
+    '72040': 150,
+    '72050': 250,
+    '72070': 100,
+    '72100': 100,
+    '72110': 200,
+    '97010': 30,
+    '97012': 50,
+    '97014': 50,
+    'G0283': 50,
+    '97026': 50,
+    '97035': 50,
+    '97039': 50,
+    '97110': 75,
+    '97112': 75,
+    '97124': 60,
+    '97140': 60,
+    '97530': 75,
+    '98940': 105,
+    '98941': 115,
+    '98943': 75,
+    '99202': 150,
+    '99203': 200,
+    '99212': 100,
+    '99213': 150
+  };
+
+
+  const nonCoveredFullFeeMap = {
+    radiologist: 60,
+    stimpads: 15.82,
+    orthotics: 339,
+    orthotics2pair: 559,
+    nc98941: fullFeeSchedule['98941'],
+    nc98943: fullFeeSchedule['98943'],
+    nc97110: fullFeeSchedule['97110'],
+    ncG0283: fullFeeSchedule['G0283'],
+    nc97012: fullFeeSchedule['97012'],
+    nc99213: fullFeeSchedule['99213'],
+    nc99203: fullFeeSchedule['99203'],
+    supportiveEM: 25
+  };
+
+  function fmtMoney(val){
+    return currency.format(Number(val || 0));
+  }
+
+  function todayString(){
+    const dt = new Date();
+    const month = String(dt.getMonth()+1).padStart(2,'0');
+    const day = String(dt.getDate()).padStart(2,'0');
+    return dt.getFullYear() + '-' + month + '-' + day;
+  }
+
+  function displayDate(value){
+    if (!value) return '—';
+    const dt = new Date(value + 'T00:00:00');
+    return dt.toLocaleDateString('en-US',{year:'numeric',month:'long',day:'numeric'});
+  }
+
+  function normalizeQty(value){
+    const n = parseInt(value,10);
+    return Number.isFinite(n) && n >= 0 ? n : 0;
+  }
+
+  function normalizeAmount(value){
+    const n = Number(value);
+    if (!Number.isFinite(n)) return 0;
+    return Math.max(0, Math.min(1000, n));
+  }
+
+  function loadOtherPresets(){
+    try {
+      const raw = localStorage.getItem(OTHER_STORAGE_KEY);
+      const parsed = JSON.parse(raw || '[]');
+      if (Array.isArray(parsed)) {
+        return parsed.filter(item => item && typeof item.description === 'string' && Number.isFinite(Number(item.amount)));
+      }
+    } catch (e) {}
+    return [];
+  }
+
+  function saveOtherPreset(description, amount){
+    const desc = String(description || '').trim();
+    const amt = normalizeAmount(amount);
+    if (!desc || amt <= 0) return;
+    const presets = loadOtherPresets();
+    const deduped = presets.filter(item => !(item.description === desc && Number(item.amount) === amt));
+    deduped.unshift({ description: desc, amount: amt });
+    localStorage.setItem(OTHER_STORAGE_KEY, JSON.stringify(deduped.slice(0, 8)));
+  }
+
+  function buildInsuranceList(filterText=''){
+    const current = state.insurance;
+    insuranceSelect.innerHTML = '';
+    const items = data.insuranceCompanies
+      .filter(name => name.toLowerCase().includes(filterText.toLowerCase()))
+      .sort((a,b) => a.localeCompare(b));
+
+    items.forEach(name => {
+      const option = document.createElement('option');
+      option.value = name;
+      option.textContent = name;
+      if ((current && current === name) || (!current && insuranceSelect.options.length === 0)) {
+        option.selected = true;
+        state.insurance = name;
+      }
+      insuranceSelect.appendChild(option);
+    });
+
+    if (!items.length) {
+      const option = document.createElement('option');
+      option.textContent = 'No matches';
+      insuranceSelect.appendChild(option);
+    }
+  }
+
+
+  function renderOtherRow(){
+    const row = document.createElement('div');
+    row.className = 'noncovered-item noncovered-item-other';
+
+    const left = document.createElement('div');
+    const label = document.createElement('strong');
+    label.textContent = 'OTHER';
+    const helper = document.createElement('div');
+    helper.className = 'muted';
+    helper.textContent = 'Custom non-covered line item';
+    left.appendChild(label);
+    left.appendChild(helper);
+
+    const fields = document.createElement('div');
+    fields.className = 'other-fields';
+
+    const descInput = document.createElement('input');
+    descInput.type = 'text';
+    descInput.id = 'otherDescription';
+    descInput.placeholder = 'Description';
+    descInput.maxLength = 80;
+
+    const presets = loadOtherPresets();
+    if (presets.length) {
+      const listId = 'otherPresetsList';
+      descInput.setAttribute('list', listId);
+      const datalist = document.createElement('datalist');
+      datalist.id = listId;
+      presets.forEach(item => {
+        const option = document.createElement('option');
+        option.value = item.description;
+        option.label = item.description + ' — ' + fmtMoney(item.amount);
+        datalist.appendChild(option);
+      });
+      fields.appendChild(datalist);
+    }
+
+    const amountInput = document.createElement('input');
+    amountInput.type = 'number';
+    amountInput.id = 'otherAmount';
+    amountInput.min = '0';
+    amountInput.max = '1000';
+    amountInput.step = '0.01';
+    amountInput.placeholder = 'Amount';
+
+    const qtyWrap = document.createElement('div');
+    qtyWrap.className = 'qty-wrap';
+    qtyWrap.innerHTML = '<span class="muted">Qty</span>';
+
+    const qtyInput = document.createElement('input');
+    qtyInput.type = 'number';
+    qtyInput.id = 'otherQty';
+    qtyInput.min = '0';
+    qtyInput.step = '1';
+    qtyInput.value = '0';
+    qtyInput.className = 'qty-input noncovered-qty';
+    qtyWrap.appendChild(qtyInput);
+
+    const presetMap = {};
+    presets.forEach(item => { presetMap[item.description] = Number(item.amount); });
+
+    descInput.addEventListener('change', () => {
+      const desc = descInput.value.trim();
+      if (desc && presetMap[desc] !== undefined && !Number(amountInput.value)) {
+        amountInput.value = presetMap[desc].toFixed(2);
+      }
+      recalc();
+    });
+    amountInput.addEventListener('input', recalc);
+    qtyInput.addEventListener('input', recalc);
+    amountInput.addEventListener('blur', () => {
+      const desc = descInput.value.trim();
+      const amt = normalizeAmount(amountInput.value);
+      const qty = normalizeQty(qtyInput.value);
+      if (desc && amt > 0 && qty > 0) saveOtherPreset(desc, amt);
+    });
+    descInput.addEventListener('blur', () => {
+      const desc = descInput.value.trim();
+      const amt = normalizeAmount(amountInput.value);
+      const qty = normalizeQty(qtyInput.value);
+      if (desc && amt > 0 && qty > 0) saveOtherPreset(desc, amt);
+    });
+
+    fields.appendChild(descInput);
+    fields.appendChild(amountInput);
+    row.appendChild(left);
+    row.appendChild(fields);
+    row.appendChild(qtyWrap);
+    nonCoveredList.appendChild(row);
+  }
+
+  function renderNonCovered(){
+    nonCoveredList.innerHTML = '';
+    data.nonCoveredDefaults.forEach(item => {
+      if (state.nonCoveredQty[item.id] === undefined) state.nonCoveredQty[item.id] = item.defaultQty || 0;
+      const row = document.createElement('div');
+      row.className = 'noncovered-item';
+
+      const text = document.createElement('div');
+      text.innerHTML = '<strong>' + item.label + '</strong><div class="muted">' + fmtMoney(item.amount) + ' each</div>';
+
+      const qtyWrap = document.createElement('div');
+      qtyWrap.className = 'qty-wrap';
+      qtyWrap.innerHTML = '<span class="muted">Qty</span>';
+
+      const qty = document.createElement('input');
+      qty.type = 'number';
+      qty.min = '0';
+      qty.step = '1';
+      qty.className = 'qty-input noncovered-qty';
+      qty.value = state.nonCoveredQty[item.id];
+      qty.addEventListener('input', () => {
+        state.nonCoveredQty[item.id] = normalizeQty(qty.value);
+        recalc();
+      });
+      qtyWrap.appendChild(qty);
+
+      const amount = document.createElement('strong');
+      amount.textContent = fmtMoney(item.amount);
+      row.appendChild(text);
+      row.appendChild(qtyWrap);
+      row.appendChild(amount);
+      nonCoveredList.appendChild(row);
+    });
+    renderOtherRow();
+  }
+
+  function renderPlanTable(){
+    planTableBody.innerHTML = '';
+    data.cptCatalog.forEach(item => {
+      if (state.quantities[item.code] === undefined) state.quantities[item.code] = data.standardPlan[item.code] || 0;
+      const tr = document.createElement('tr');
+      tr.dataset.code = item.code;
+
+      const categoryTd = document.createElement('td');
+      categoryTd.textContent = item.category || '';
+
+      const codeTd = document.createElement('td');
+      codeTd.innerHTML = '<strong>' + (item.code === '99213' ? '99213 / 99213-25 estimate' : item.code) + '</strong><div class="muted">' + (serviceLabels[item.code] || '') + '</div>';
+
+      const qtyTd = document.createElement('td');
+      const qtyInput = document.createElement('input');
+      qtyInput.className = 'qty-input';
+      qtyInput.type = 'number';
+      qtyInput.min = '0';
+      qtyInput.step = '1';
+      qtyInput.value = state.quantities[item.code];
+      qtyInput.addEventListener('input', () => {
+        state.quantities[item.code] = normalizeQty(qtyInput.value);
+        recalc();
+      });
+      qtyTd.appendChild(qtyInput);
+
+      const allowedTd = document.createElement('td');
+      allowedTd.className = 'money allowed';
+
+      const subtotalTd = document.createElement('td');
+      subtotalTd.className = 'money subtotal';
+
+      const notesTd = document.createElement('td');
+      notesTd.className = 'note notes';
+
+      tr.appendChild(categoryTd);
+      tr.appendChild(codeTd);
+      tr.appendChild(qtyTd);
+      tr.appendChild(allowedTd);
+      tr.appendChild(subtotalTd);
+      tr.appendChild(notesTd);
+      planTableBody.appendChild(tr);
+    });
+  }
+
+  function selectedInsuranceSchedule(){
+    const name = insuranceSelect.value;
+    state.insurance = name;
+    return data.feeSchedules[name] || {};
+  }
+
+  function recalc(){
+    const schedule = selectedInsuranceSchedule();
+    const insurerNotes = data.insurerCodeNotes[state.insurance] || {};
+    let coveredTotal = 0;
+    let fullFeeTotal = 0;
+    let missingCodes = [];
+    let visitCount = 0;
+
+    [...planTableBody.querySelectorAll('tr')].forEach(tr => {
+      const code = tr.dataset.code;
+      const qty = normalizeQty(state.quantities[code]);
+      const allowed = schedule[code];
+      const allowedCell = tr.querySelector('.allowed');
+      const subtotalCell = tr.querySelector('.subtotal');
+      const notesCell = tr.querySelector('.notes');
+      const hasAllowed = typeof allowed === 'number' && !Number.isNaN(allowed);
+      const subtotal = hasAllowed ? allowed * qty : 0;
+      const fullFee = Number(fullFeeSchedule[code] || 0);
+
+      if (qty > 0) visitCount = Math.max(visitCount, qty);
+      if (qty > 0 && !hasAllowed) missingCodes.push(code);
+
+      coveredTotal += subtotal;
+      fullFeeTotal += fullFee * qty;
+      allowedCell.textContent = hasAllowed ? fmtMoney(allowed) : '—';
+      subtotalCell.textContent = qty > 0 ? fmtMoney(subtotal) : '—';
+
+      const noteParts = [];
+      if (insurerNotes[code]) noteParts.push(insurerNotes[code]);
+      if (code === '99213' && qty > 0) noteParts.push('Used for 99213-25 estimate.');
+      if (!hasAllowed && qty > 0) noteParts.push('No allowed amount in fee sheet.');
+      notesCell.textContent = noteParts.join(' ');
+    });
+
+    const deductible = Math.max(0, Number(deductibleInput.value) || 0);
+    const coinsurancePct = Math.max(0, Math.min(100, Number(coinsuranceInput.value) || 0)) / 100;
+    const copay = Math.max(0, Number(copayInput.value) || 0);
+    const copayVisits = Math.max(0, Number(copayVisitsInput.value) || 0);
+
+    const patientDeductiblePortion = Math.min(deductible, coveredTotal);
+    const remainingCoveredAfterDeductible = Math.max(0, coveredTotal - patientDeductiblePortion);
+    const patientCoinsurancePortion = remainingCoveredAfterDeductible * coinsurancePct;
+    const patientCopayPortion = copay * copayVisits;
+
+    let nonCoveredTotal = 0;
+    let nonCoveredFullFeeTotal = 0;
+    const nonCoveredSelected = [];
+    data.nonCoveredDefaults.forEach(item => {
+      const qty = normalizeQty(state.nonCoveredQty[item.id]);
+      if (qty > 0) {
+        const lineTotal = item.amount * qty;
+        const fullLineTotal = Number(nonCoveredFullFeeMap[item.id] || item.amount || 0) * qty;
+        nonCoveredTotal += lineTotal;
+        nonCoveredFullFeeTotal += fullLineTotal;
+        nonCoveredSelected.push(item.label + ' × ' + qty + ' — ' + fmtMoney(lineTotal));
+      }
+    });
+
+    const otherDescriptionEl = document.getElementById('otherDescription');
+    const otherAmountEl = document.getElementById('otherAmount');
+    const otherQtyEl = document.getElementById('otherQty');
+    const otherDescription = otherDescriptionEl ? otherDescriptionEl.value.trim() : '';
+    const otherAmount = otherAmountEl ? normalizeAmount(otherAmountEl.value) : 0;
+    const otherQty = otherQtyEl ? normalizeQty(otherQtyEl.value) : 0;
+    if (otherDescription && otherAmount > 0 && otherQty > 0) {
+      const otherTotal = otherAmount * otherQty;
+      nonCoveredTotal += otherTotal;
+      nonCoveredFullFeeTotal += otherTotal;
+      nonCoveredSelected.push(otherDescription + ' × ' + otherQty + ' — ' + fmtMoney(otherTotal));
+    }
+
+    fullFeeTotal += nonCoveredFullFeeTotal;
+
+    const patientResponsibility = patientDeductiblePortion + patientCoinsurancePortion + patientCopayPortion + nonCoveredTotal;
+    const insurancePortion = Math.max(0, coveredTotal - patientDeductiblePortion - patientCoinsurancePortion);
+    const totalPlanVisits = normalizeQty(state.quantities['98941']) + normalizeQty(state.nonCoveredQty['nc98941']);
+    const averageCostPerVisit = totalPlanVisits > 0 ? patientResponsibility / totalPlanVisits : 0;
+
+    const activeServiceRows = data.cptCatalog
+      .map(item => {
+        const code = item.code;
+        const qty = normalizeQty(state.quantities[code]);
+        const allowed = schedule[code];
+        const hasAllowed = typeof allowed === 'number' && !Number.isNaN(allowed);
+        const fullFee = Number(fullFeeSchedule[code] || 0);
+        return {
+          category: item.category || '',
+          code: code === '99213' ? '99213-25' : code,
+          serviceLabel: serviceLabels[item.code] || item.code,
+          qty,
+          fullFee,
+          allowed,
+          subtotal: hasAllowed ? allowed * qty : 0,
+          hasAllowed
+        };
+      })
+      .filter(row => row.qty > 0);
+
+    fullFeeTotalEl.textContent = fmtMoney(fullFeeTotal);
+    coveredTotalEl.textContent = fmtMoney(coveredTotal);
+    insurancePortionEl.textContent = fmtMoney(insurancePortion);
+    patientResponsibilityEl.textContent = fmtMoney(patientResponsibility);
+
+    detailList.innerHTML = '';
+    [
+      'Patient: ' + (patientName.value.trim() || 'Not entered'),
+      'Insurance: ' + (state.insurance || 'Not selected'),
+      'Total cost at full fees: ' + fmtMoney(fullFeeTotal),
+      'Total allowed amount: ' + fmtMoney(coveredTotal),
+      'Deductible applied to covered services: ' + fmtMoney(patientDeductiblePortion),
+      'Coinsurance patient portion: ' + fmtMoney(patientCoinsurancePortion),
+      'Copay estimate: ' + fmtMoney(patientCopayPortion) + ' (' + copayVisits + ' visits × ' + fmtMoney(copay) + ')',
+      'Selected non-covered items: ' + (nonCoveredSelected.length ? nonCoveredSelected.join('; ') : 'None'),
+      'Non-covered total: ' + fmtMoney(nonCoveredTotal),
+      'Average cost per visit: ' + fmtMoney(averageCostPerVisit) + ' (' + totalPlanVisits + ' visits)'
+    ].forEach(text => {
+      const li = document.createElement('li');
+      li.textContent = text;
+      detailList.appendChild(li);
+    });
+
+    paymentList.innerHTML = '';
+    const discountPct = Math.max(0, Math.min(100, Number(payInFullDiscountInput.value) || 0));
+    const nonCoveredDiscountAmount = nonCoveredTotal * (discountPct / 100);
+    const payInFullAmount = patientResponsibility - nonCoveredDiscountAmount;
+    const monthsA = Math.max(1, Number(monthsAInput.value) || 3);
+    const monthsB = Math.max(1, Number(monthsBInput.value) || 6);
+    const paymentOptionTexts = [
+      'Average cost per visit: ' + fmtMoney(averageCostPerVisit) + ' (' + totalPlanVisits + ' visits)',
+      'Pay in full (' + discountPct + '% discount on non-covered services): ' + fmtMoney(payInFullAmount),
+      monthsA + '-month plan: ' + fmtMoney(patientResponsibility / monthsA) + ' / month',
+      monthsB + '-month plan: ' + fmtMoney(patientResponsibility / monthsB) + ' / month'
+    ];
+    paymentOptionTexts.forEach(text => {
+      const li = document.createElement('li');
+      li.textContent = text;
+      paymentList.appendChild(li);
+    });
+
+    printClinicName.textContent = clinicName.value.trim() || 'Chiropractic Company';
+    printPatientName.textContent = patientName.value.trim() || 'Not entered';
+    printDate.textContent = displayDate(planDate.value);
+    printInsurance.textContent = state.insurance || 'Not selected';
+    printEstimateAcknowledge.checked = !!estimateAcknowledge.checked;
+    printFullFeeTotal.textContent = fmtMoney(fullFeeTotal);
+    printCoveredTotal.textContent = fmtMoney(coveredTotal);
+    printPatientResponsibility.textContent = fmtMoney(patientResponsibility);
+
+    printServicesBody.innerHTML = '';
+    activeServiceRows.forEach(row => {
+      const tr = document.createElement('tr');
+      tr.innerHTML = '<td>' + row.category + '</td>' +
+        '<td><strong>' + row.code + '</strong><div class="print-service-label">' + row.serviceLabel + '</div></td>' +
+        '<td class="money">' + row.qty + '</td>' +
+        '<td class="money">' + fmtMoney(row.fullFee) + '</td>' +
+        '<td class="money">' + (row.hasAllowed ? fmtMoney(row.allowed) : '—') + '</td>' +
+        '<td class="money">' + fmtMoney(row.subtotal) + '</td>';
+      printServicesBody.appendChild(tr);
+    });
+    if (!activeServiceRows.length) {
+      const tr = document.createElement('tr');
+      tr.innerHTML = '<td colspan="6">No services with units are currently included.</td>';
+      printServicesBody.appendChild(tr);
+    }
+
+    printPaymentList.innerHTML = '';
+    paymentOptionTexts.forEach(text => {
+      const li = document.createElement('li');
+      li.textContent = text;
+      printPaymentList.appendChild(li);
+    });
+
+    printNonCoveredList.innerHTML = '';
+    if (nonCoveredSelected.length) {
+      nonCoveredSelected.forEach(text => {
+        const li = document.createElement('li');
+        li.textContent = text;
+        printNonCoveredList.appendChild(li);
+      });
+    } else {
+      const li = document.createElement('li');
+      li.textContent = 'None selected';
+      printNonCoveredList.appendChild(li);
+    }
+
+    assumptionList.innerHTML = '';
+    const assumptionItems = [];
+    data.planAssumptions.forEach(text => assumptionItems.push(text));
+    if (missingCodes.length) assumptionItems.push('Missing allowed amounts for selected codes under this payer: ' + missingCodes.join(', ') + '. Those lines are estimated at ' + fmtMoney(0) + '.');
+    const insurerNoteCodes = Object.keys(insurerNotes);
+    if (insurerNoteCodes.length) assumptionItems.push('Payer-specific fee sheet notes present for: ' + insurerNoteCodes.join(', ') + '. See service notes column.');
+    if (!coveredTotal) assumptionItems.push('Covered allowed total is currently ' + fmtMoney(0) + '. Confirm the payer selection and service quantities.');
+    assumptionItems.forEach(text => {
+      const li = document.createElement('li');
+      li.textContent = text;
+      if (text.includes('Missing allowed amounts') || text.includes('currently $0.00')) li.className = 'warning';
+      assumptionList.appendChild(li);
+    });
+  }
+
+  function resetPlan(){
+    Object.keys(state.quantities).forEach(code => {
+      state.quantities[code] = data.standardPlan[code] || 0;
+    });
+    [...planTableBody.querySelectorAll('tr')].forEach(tr => {
+      const code = tr.dataset.code;
+      const input = tr.querySelector('input');
+      input.value = state.quantities[code];
+    });
+    deductibleInput.value = 0;
+    coinsuranceInput.value = 0;
+    copayInput.value = 0;
+    copayVisitsInput.value = 24;
+    payInFullDiscountInput.value = 10;
+    monthsAInput.value = 3;
+    monthsBInput.value = 6;
+    data.nonCoveredDefaults.forEach(item => state.nonCoveredQty[item.id] = item.defaultQty || 0);
+    renderNonCovered();
+    const otherDescriptionEl = document.getElementById('otherDescription');
+    const otherAmountEl = document.getElementById('otherAmount');
+    const otherQtyEl = document.getElementById('otherQty');
+    if (otherDescriptionEl) otherDescriptionEl.value = '';
+    if (otherAmountEl) otherAmountEl.value = '';
+    if (otherQtyEl) otherQtyEl.value = 0;
+    recalc();
+  }
+
+  insuranceSearch.addEventListener('input', () => {
+    const current = insuranceSelect.value;
+    state.insurance = current;
+    buildInsuranceList(insuranceSearch.value);
+    recalc();
+  });
+
+  insuranceSelect.addEventListener('change', recalc);
+  document.getElementById('recalculateBtn').addEventListener('click', recalc);
+  document.getElementById('resetBtn').addEventListener('click', resetPlan);
+  document.getElementById('printBtn').addEventListener('click', () => {
+    const originalTitle = document.title;
+    const safePatient = (patientName.value.trim() || 'Patient').replace(/[^a-z0-9]+/gi, '_').replace(/^_+|_+$/g, '');
+    const safeDate = (planDate.value || todayString()).replace(/-/g, '');
+    document.title = safePatient + '_FinancialCarePlan_' + safeDate;
+    window.print();
+    setTimeout(() => { document.title = originalTitle; }, 500);
+  });
+  [clinicName, patientName, planDate, deductibleInput, coinsuranceInput, copayInput, copayVisitsInput, payInFullDiscountInput, monthsAInput, monthsBInput]
+    .forEach(el => el.addEventListener('input', recalc));
+  estimateAcknowledge.addEventListener('change', recalc);
+
+  clinicName.value = clinicName.value || 'Chiropractic Company';
+  planDate.value = todayString();
+  buildInsuranceList();
+  renderNonCovered();
+  renderPlanTable();
+  recalc();
+})();
+
+</script>
+</body>
+</html>
